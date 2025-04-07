@@ -22,7 +22,9 @@ export default function Home() {
           </li>
           <li className="tracking-[-.01em]">
             Hello NEXT!!!
+          
           </li>
+          <li>The Environment is {process.env.MY_VALUE}</li>
         </ol>
 
         <div className="flex gap-4 items-center flex-col sm:flex-row">
