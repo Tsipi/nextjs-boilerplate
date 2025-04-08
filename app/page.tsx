@@ -22,12 +22,10 @@ export default function Home() {
             .
           </li>
           <li className="tracking-[-.01em]">
-            Visit our{" "}
-            <Link href="/blog" className="text-blue-600 hover:underline">
-              Blog Page
-            </Link>
-            {" "}to see more content.
-          </li>
+
+            Hello David!!!!!!!!!!!!
+            </li>
+          <li>The Environment is {process.env.MY_VALUE}</li>
         </ol>
 
         <div className="flex gap-4 items-center flex-col sm:flex-row">
