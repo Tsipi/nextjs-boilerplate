@@ -29,7 +29,7 @@ function GlobeIcon({ color }: { color: string }) {
       fill="none" 
       xmlns="http://www.w3.org/2000/svg" 
       viewBox="0 0 16 16"
-      className="w-[50px] h-[50px] p-2"
+      className="w-[40px] h-[40px] p-2"
     >
       <g clipPath="url(#a)">
         <path
@@ -115,7 +115,7 @@ interface Category {
   companies: Company[];
 }
 
-export default function MapPage() {
+export default function MapLargePage() {
   const [mainTitle, setMainTitle] = useState("Israeli Fintech Companies");
   const [subTitle, setSubTitle] = useState("Banking And Payments Landscape");
   const [categoryList, setCategoryList] = useState<Category[]>(categories);
@@ -124,7 +124,7 @@ export default function MapPage() {
   const [sidebarTitle, setSidebarTitle] = useState("Innovation Hub");
   const [sidebarSubtitle, setSidebarSubtitle] = useState("Transforming Financial Technology");
   const [sidebarText, setSidebarText] = useState(
-    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
   );
 
   const handlePrint = () => {
@@ -145,39 +145,45 @@ export default function MapPage() {
 
     const { source, destination, type } = result;
 
-    // If we're dragging categories
     if (type === 'category') {
-      const newCategories = Array.from(categoryList);
-      const [removed] = newCategories.splice(source.index, 1);
-      newCategories.splice(destination.index, 0, removed);
-      setCategoryList(newCategories);
+      const reorderedCategories = Array.from(categoryList);
+      const [removed] = reorderedCategories.splice(source.index, 1);
+      reorderedCategories.splice(destination.index, 0, removed);
+      setCategoryList(reorderedCategories);
       return;
     }
 
-    // If we're dragging companies
     if (type === 'company') {
-      const newCategories = Array.from(categoryList);
+      const newCategories = [...categoryList];
       const sourceCategory = newCategories[parseInt(source.droppableId)];
       const destCategory = newCategories[parseInt(destination.droppableId)];
 
-      // Moving within the same category
       if (source.droppableId === destination.droppableId) {
         const companies = Array.from(sourceCategory.companies);
         const [removed] = companies.splice(source.index, 1);
         companies.splice(destination.index, 0, removed);
-        sourceCategory.companies = companies;
+
+        newCategories[parseInt(source.droppableId)] = {
+          ...sourceCategory,
+          companies,
+          count: companies.length
+        };
       } else {
-        // Moving between different categories
         const sourceCompanies = Array.from(sourceCategory.companies);
         const destCompanies = Array.from(destCategory.companies);
-        const [removed] = sourceCompanies.splice(source.index, 1);
-        destCompanies.splice(destination.index, 0, removed);
-        sourceCategory.companies = sourceCompanies;
-        destCategory.companies = destCompanies;
+        const [moved] = sourceCompanies.splice(source.index, 1);
+        destCompanies.splice(destination.index, 0, moved);
 
-        // Update counts
-        sourceCategory.count = sourceCompanies.length;
-        destCategory.count = destCompanies.length;
+        newCategories[parseInt(source.droppableId)] = {
+          ...sourceCategory,
+          companies: sourceCompanies,
+          count: sourceCompanies.length
+        };
+        newCategories[parseInt(destination.droppableId)] = {
+          ...destCategory,
+          companies: destCompanies,
+          count: destCompanies.length
+        };
       }
 
       setCategoryList(newCategories);
@@ -188,42 +194,34 @@ export default function MapPage() {
     <div className="min-h-screen bg-[#f0f7fa] p-8 print:p-0 print:bg-white">
       <div className="printable-content">
         {/* Header */}
-        <header className="max-w-7xl mx-auto mb-8">
+        <header className="max-w-[1920px] mx-auto mb-8 bg-[#b6cfdb] rounded-xl p-6">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-3xl font-bold text-[#1a2b3b] mb-2">
+              <h1 className="text-4xl font-bold text-[#1a2b3b] mb-2">
                 <EditableText
                   value={mainTitle}
                   onChange={setMainTitle}
-                  className="text-3xl font-bold text-[#1a2b3b]"
+                  className="text-4xl font-bold text-[#1a2b3b]"
                 />
               </h1>
-              <h2 className="text-lg text-gray-600">
+              <h2 className="text-xl text-gray-600">
                 <EditableText
                   value={subTitle}
                   onChange={setSubTitle}
-                  className="text-lg text-gray-600"
+                  className="text-xl text-gray-600"
                 />
               </h2>
             </div>
-            <div className="flex items-center gap-4 print:hidden">
-              <span className="text-[#8b98a5]">2025</span>
-              <button className="bg-white px-4 py-2 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors flex items-center gap-2">
-                <span>OPEN IN FINDER</span>
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                  <polyline points="15 3 21 3 21 9"></polyline>
-                  <line x1="10" y1="14" x2="21" y2="3"></line>
-                </svg>
-              </button>
+            <div className="flex items-center gap-4">
+              <span className="text-[80px] font-bold text-[#E8EFF3]">2025</span>
             </div>
           </div>
         </header>
 
         {/* Main Content */}
-        <div className="max-w-7xl mx-auto flex gap-8">
+        <div className="max-w-[1920px] mx-auto flex gap-8">
           {/* Left Sidebar */}
-          <div className="w-80 flex-shrink-0">
+          <div className="w-72 flex-shrink-0">
             <div className="bg-white rounded-xl p-6 shadow-sm">
               <h2 className="text-2xl font-bold text-[#1a2b3b] mb-2">
                 <EditableText
@@ -299,51 +297,81 @@ export default function MapPage() {
             </div>
           </div>
 
-          {/* Main Grid */}
+          {/* Grid of Categories */}
           <DragDropContext onDragEnd={onDragEnd}>
-            <Droppable droppableId="categories" type="category" direction="horizontal">
-              {(provided, snapshot) => (
-                <div
-                  ref={provided.innerRef}
+            <Droppable droppableId="categories" type="category" direction="vertical">
+              {(provided: DroppableProvided, snapshot: DroppableStateSnapshot) => (
+                <div 
                   {...provided.droppableProps}
-                  className={`grid grid-cols-2 gap-6 p-6 ${snapshot.isDraggingOver ? 'bg-gray-50' : ''}`}
+                  ref={provided.innerRef}
+                  className="flex-1 grid grid-cols-3 gap-4"
                 >
                   {categoryList.map((category, index) => (
-                    <Draggable key={index} draggableId={`category-${index}`} index={index}>
-                      {(provided, snapshot) => (
+                    <Draggable
+                      key={category.name}
+                      draggableId={category.name}
+                      index={index}
+                    >
+                      {(provided: DraggableProvided, snapshot: DraggableStateSnapshot) => (
                         <div
                           ref={provided.innerRef}
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
-                          className={`bg-white rounded-lg shadow-md p-4 ${snapshot.isDragging ? 'shadow-lg ring-2 ring-blue-500 z-50' : ''}`}
-                          style={provided.draggableProps.style}
+                          className={`bg-white rounded-xl p-3 shadow-sm transition-shadow ${
+                            snapshot.isDragging ? 'shadow-lg ring-2 ring-blue-500 ring-opacity-50' : ''
+                          }`}
                         >
-                          <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-lg font-semibold">{category.name}</h3>
-                            <span className="text-sm bg-green-100 text-green-800 px-2 py-1 rounded-full">{category.count}</span>
+                          <div className="flex justify-between items-center mb-2">
+                            <h3 className="text-base font-semibold">
+                              <EditableText
+                                value={category.name}
+                                onChange={(newTitle) => updateCategoryTitle(index, newTitle)}
+                                className="text-base font-semibold"
+                              />
+                            </h3>
+                            <span className="bg-[#9ab7a0]/80 text-white px-2 py-0.5 rounded-full text-xs">
+                              {category.count}
+                            </span>
                           </div>
-                          <Droppable droppableId={`${index}`} type="company" direction="horizontal">
-                            {(provided, snapshot) => (
+                          <Droppable
+                            droppableId={`${index}`}
+                            type="company"
+                            direction="horizontal"
+                          >
+                            {(provided: DroppableProvided, snapshot: DroppableStateSnapshot) => (
                               <div
                                 ref={provided.innerRef}
                                 {...provided.droppableProps}
-                                className={`flex flex-wrap gap-3 min-h-[100px] ${snapshot.isDraggingOver ? 'bg-blue-50' : ''}`}
+                                className={`flex flex-wrap gap-1.5 min-h-[40px] p-2 rounded-lg transition-colors ${
+                                  snapshot.isDraggingOver ? 'bg-blue-50' : ''
+                                }`}
                               >
                                 {category.companies.map((company, companyIndex) => (
                                   <Draggable
                                     key={company.id}
-                                    draggableId={`company-${company.id}`}
+                                    draggableId={company.id}
                                     index={companyIndex}
                                   >
-                                    {(provided, snapshot) => (
+                                    {(provided: DraggableProvided, snapshot: DraggableStateSnapshot) => (
                                       <div
                                         ref={provided.innerRef}
                                         {...provided.draggableProps}
                                         {...provided.dragHandleProps}
-                                        className={`flex-shrink-0 ${snapshot.isDragging ? 'z-50' : ''}`}
-                                        style={provided.draggableProps.style}
+                                        style={{
+                                          ...provided.draggableProps.style,
+                                        }}
+                                        className={`w-[40px] h-[40px] bg-gray-50 rounded-lg flex items-center justify-center hover:bg-gray-100 transition-all cursor-move group relative ${
+                                          snapshot.isDragging ? 'shadow-lg ring-2 ring-blue-500 ring-opacity-50 scale-105 z-50' : ''
+                                        }`}
                                       >
-                                        <GlobeIcon color={stringToColor(company.name)} />
+                                        <div className="relative w-full h-full flex items-center justify-center">
+                                          <GlobeIcon color={stringToColor(company.name)} />
+                                        </div>
+                                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 rounded-lg z-10">
+                                          <span className="text-[10px] font-medium text-gray-800 px-1 text-center">
+                                            {company.name}
+                                          </span>
+                                        </div>
                                       </div>
                                     )}
                                   </Draggable>
@@ -365,7 +393,7 @@ export default function MapPage() {
       </div>
 
       {/* Footer */}
-      <footer className="max-w-7xl mx-auto mt-8 flex items-center justify-between">
+      <footer className="max-w-[1920px] mx-auto mt-8 flex items-center justify-between">
         <div className="flex items-center gap-3 text-sm text-gray-600">
           <div className="w-28 h-10">
             <Image 
@@ -379,12 +407,11 @@ export default function MapPage() {
           <span>Powered by Startup Nation Finder</span>
         </div>
         <div className="flex items-center gap-4">
-          <span className="text-[#8b98a5]">2025</span>
           <Link 
-            href="/map-large"
-            className="bg-white px-4 py-2 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors flex items-center gap-2"
+            href="/map"
+            className="bg-white px-4 py-2 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors flex items-center gap-2 print:hidden"
           >
-            <span>Switch to Large Mode</span>
+            <span>Switch to Normal Mode</span>
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M15 3h6v6"></path>
               <path d="M10 14L21 3"></path>
@@ -410,7 +437,7 @@ export default function MapPage() {
         @media print {
           @page {
             size: A4 landscape;
-            margin: 12mm;
+            margin: 1mm 5mm;
           }
           
           html, body {
@@ -418,9 +445,6 @@ export default function MapPage() {
             height: 210mm;
             margin: 0;
             padding: 0;
-          }
-
-          body {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
@@ -435,11 +459,11 @@ export default function MapPage() {
 
           .printable-content {
             width: 100%;
-            height: calc(100% - 60px);
+            height: calc(100% - 10px);
             background: white;
-            transform: scale(0.88);
+            transform: scale(0.99);
             transform-origin: top center;
-            padding-bottom: 40px !important;
+            padding: 0.5mm 4mm !important;
           }
 
           /* Maintain grid structure */
@@ -447,99 +471,168 @@ export default function MapPage() {
             display: grid !important;
           }
 
-          .grid-cols-2 {
-            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+          .grid-cols-3 {
+            grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
           }
 
           /* Adjust spacing for print */
           .p-8 {
-            padding: 0.5rem !important;
+            padding: 3mm !important;
           }
 
           .gap-8 {
-            gap: 0.75rem !important;
+            gap: 3mm !important;
           }
 
-          .gap-6 {
-            gap: 1rem !important;
+          .gap-4 {
+            gap: 2mm !important;
           }
 
-          .gap-3 {
-            gap: 0.5rem !important;
+          .p-3 {
+            padding: 1.5mm !important;
           }
 
-          .mb-4 {
-            margin-bottom: 0.5rem !important;
+          .gap-1\\.5 {
+            gap: 1.5mm !important;
           }
 
-          .p-4 {
-            padding: 0.75rem !important;
+          .mb-8 {
+            margin-bottom: 0.5mm !important;
           }
 
-          /* Adjust text sizes for print */
-          .text-3xl {
-            font-size: 1.5rem !important;
+          .mb-2 {
+            margin-bottom: 0.5mm !important;
           }
 
-          .text-xl {
-            font-size: 1.125rem !important;
+          /* Adjust icon sizes for print */
+          .w-[40px] {
+            width: 38px !important;
+            height: 38px !important;
           }
 
-          .text-lg {
-            font-size: 1rem !important;
+          .h-[40px] {
+            width: 38px !important;
+            height: 38px !important;
           }
 
-          /* Ensure sidebar width is appropriate */
-          .w-80 {
-            width: 15rem !important;
+          /* Adjust the SVG icon size */
+          .w-[40px].h-[40px].p-2 {
+            width: 38px !important;
+            height: 38px !important;
+            padding: 2.5px !important;
           }
 
-          /* Dynamic icon sizing based on company count */
-          .w-\\[50px\\] {
-            width: calc(32px - var(--company-count, 0) * 0.2px) !important;
+          /* Adjust the flex container for 5 icons per row */
+          .flex.flex-wrap.gap-1\\.5 {
+            gap: 2mm !important;
+            display: grid !important;
+            grid-template-columns: repeat(5, 1fr) !important;
+            padding: 2mm 2mm 0.5mm 2mm !important;
           }
 
-          .h-\\[50px\\] {
-            height: calc(32px - var(--company-count, 0) * 0.2px) !important;
+          /* Ensure icons maintain their shape */
+          .flex.items-center.justify-center {
+            width: 38px !important;
+            height: 38px !important;
           }
 
-          /* Maintain badge styles in print */
-          .bg-green-100 {
-            background-color: #dcfce7 !important;
-            color: #166534 !important;
+          /* Adjust the hover text size */
+          .text-[10px] {
+            font-size: 10px !important;
+            font-weight: 500 !important;
+          }
+
+          /* Adjust category card padding */
+          .bg-white.rounded-xl.p-3 {
+            padding: 2mm 2mm 1mm 2mm !important;
           }
 
           /* Adjust footer */
           footer {
             position: fixed !important;
-            bottom: 12mm !important;
-            left: 12mm !important;
-            right: 12mm !important;
+            bottom: 1mm !important;
+            left: 5mm !important;
+            right: 5mm !important;
             padding: 0 !important;
             margin: 0 !important;
             background: white !important;
           }
 
           /* Adjust max width container */
-          .max-w-7xl {
+          .max-w-\\[1920px\\] {
             max-width: none !important;
             width: 100% !important;
             margin-left: 0 !important;
             margin-right: 0 !important;
           }
 
-          /* Ensure company container adapts to available space */
-          .flex-wrap {
-            display: flex !important;
-            flex-wrap: wrap !important;
-            justify-content: flex-start !important;
+          /* Adjust sidebar width */
+          .w-72 {
+            width: 14rem !important;
           }
 
-          /* Ensure minimum height for droppable area */
-          .min-h-\\[100px\\] {
-            min-height: 80px !important;
-            max-height: calc(100% - 40px) !important;
-            overflow-y: auto !important;
+          /* Adjust logo containers in sidebar */
+          .w-32.h-10 {
+            width: 10rem !important;
+            height: 3rem !important;
+            padding: 0.3rem !important;
+          }
+
+          /* Adjust partner section spacing */
+          .space-y-4 {
+            margin-top: 2mm !important;
+          }
+
+          .space-y-4 > div {
+            margin-top: 2mm !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 2mm !important;
+          }
+
+          /* Adjust partner text */
+          .space-y-4 h4 {
+            font-size: 1rem !important;
+            line-height: 1.35rem !important;
+            font-weight: 500 !important;
+          }
+
+          .space-y-4 p {
+            font-size: 0.9rem !important;
+            line-height: 1.25rem !important;
+          }
+
+          /* Ensure proper logo display */
+          .object-contain {
+            object-fit: contain !important;
+            max-width: 100% !important;
+            max-height: 100% !important;
+          }
+
+          /* Adjust header margins and padding for print */
+          header.mb-8 {
+            margin-bottom: 0.5mm !important;
+          }
+
+          header.p-6 {
+            padding: 0 4mm !important;
+          }
+
+          /* Adjust header text margins */
+          header .mb-2 {
+            margin-bottom: 1mm !important;
+          }
+
+          /* Adjust year size in header */
+          .text-[80px] {
+            font-size: 65px !important;
+          }
+
+          /* Adjust main content padding */
+          .flex.gap-8 {
+            padding-top: 0.5mm !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
           }
         }
       `}</style>
