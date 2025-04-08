@@ -5,7 +5,7 @@ import Link from "next/link";
 import { categories } from '../data/companies';
 import { useRef } from 'react';
 import { useReactToPrint } from 'react-to-print';
-import type { PrintContextReturnType } from 'react-to-print';
+// import type { PrintContextReturnType } from 'react-to-print';
 
 // Function to generate a color based on string
 function stringToColor(str: string) {
