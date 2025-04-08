@@ -4,7 +4,7 @@ import { useRef, useState } from 'react';
 import Image from "next/image";
 import Link from "next/link";
 import { categories } from '../data/companies';
-import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
+import { DragDropContext, Droppable, Draggable, DropResult, DroppableProvided, DraggableProvided, DroppableStateSnapshot, DraggableStateSnapshot } from '@hello-pangea/dnd';
 
 // Function to generate a color based on string
 function stringToColor(str: string) {
@@ -58,11 +58,51 @@ export default function MapPage() {
   const onDragEnd = (result: DropResult) => {
     if (!result.destination) return;
 
-    const items = Array.from(categoryList);
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
+    const { source, destination, type } = result;
 
-    setCategoryList(items);
+    if (type === 'category') {
+      const reorderedCategories = Array.from(categoryList);
+      const [removed] = reorderedCategories.splice(source.index, 1);
+      reorderedCategories.splice(destination.index, 0, removed);
+      setCategoryList(reorderedCategories);
+      return;
+    }
+
+    if (type === 'company') {
+      const newCategories = [...categoryList];
+      const sourceCategory = newCategories[parseInt(source.droppableId)];
+      const destCategory = newCategories[parseInt(destination.droppableId)];
+
+      if (source.droppableId === destination.droppableId) {
+        const companies = Array.from(sourceCategory.companies);
+        const [removed] = companies.splice(source.index, 1);
+        companies.splice(destination.index, 0, removed);
+
+        newCategories[parseInt(source.droppableId)] = {
+          ...sourceCategory,
+          companies,
+          count: companies.length
+        };
+      } else {
+        const sourceCompanies = Array.from(sourceCategory.companies);
+        const destCompanies = Array.from(destCategory.companies);
+        const [moved] = sourceCompanies.splice(source.index, 1);
+        destCompanies.splice(destination.index, 0, moved);
+
+        newCategories[parseInt(source.droppableId)] = {
+          ...sourceCategory,
+          companies: sourceCompanies,
+          count: sourceCompanies.length
+        };
+        newCategories[parseInt(destination.droppableId)] = {
+          ...destCategory,
+          companies: destCompanies,
+          count: destCompanies.length
+        };
+      }
+
+      setCategoryList(newCategories);
+    }
   };
 
   return (
@@ -162,20 +202,20 @@ export default function MapPage() {
 
           {/* Grid of Categories */}
           <DragDropContext onDragEnd={onDragEnd}>
-            <Droppable droppableId="categories" direction="horizontal">
-              {(provided) => (
+            <Droppable droppableId="categories" type="category" direction="vertical">
+              {(provided: DroppableProvided, snapshot: DroppableStateSnapshot) => (
                 <div 
-                  className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6"
                   {...provided.droppableProps}
                   ref={provided.innerRef}
+                  className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6"
                 >
                   {categoryList.map((category, index) => (
-                    <Draggable 
-                      key={category.name} 
-                      draggableId={category.name} 
+                    <Draggable
+                      key={category.name}
+                      draggableId={category.name}
                       index={index}
                     >
-                      {(provided, snapshot) => (
+                      {(provided: DraggableProvided, snapshot: DraggableStateSnapshot) => (
                         <div
                           ref={provided.innerRef}
                           {...provided.draggableProps}
@@ -183,9 +223,6 @@ export default function MapPage() {
                           className={`bg-white rounded-xl p-6 shadow-sm transition-shadow ${
                             snapshot.isDragging ? 'shadow-lg ring-2 ring-blue-500 ring-opacity-50' : ''
                           }`}
-                          style={{
-                            ...provided.draggableProps.style,
-                          }}
                         >
                           <div className="flex justify-between items-center mb-4">
                             <h3 className="text-xl font-semibold">{category.name}</h3>
@@ -193,24 +230,53 @@ export default function MapPage() {
                               {category.count}
                             </span>
                           </div>
-                          <div className="grid grid-cols-6 gap-3">
-                            {category.companies.map((company) => (
-                              <div 
-                                key={company.id} 
-                                className="w-[50px] h-[50px] bg-gray-50 rounded-lg flex items-center justify-center hover:bg-gray-100 transition-colors cursor-pointer group relative"
-                                title={company.name}
+                          <Droppable
+                            droppableId={`${index}`}
+                            type="company"
+                            direction="horizontal"
+                          >
+                            {(provided: DroppableProvided, snapshot: DroppableStateSnapshot) => (
+                              <div
+                                ref={provided.innerRef}
+                                {...provided.droppableProps}
+                                className={`flex flex-wrap gap-3 min-h-[60px] p-2 rounded-lg transition-colors ${
+                                  snapshot.isDraggingOver ? 'bg-blue-50' : ''
+                                }`}
                               >
-                                <div className="relative w-full h-full">
-                                  <GlobeIcon color={stringToColor(company.name)} />
-                                </div>
-                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 rounded-lg z-10">
-                                  <span className="text-xs font-medium text-gray-800 px-2 text-center">
-                                    {company.name}
-                                  </span>
-                                </div>
+                                {category.companies.map((company, companyIndex) => (
+                                  <Draggable
+                                    key={company.id}
+                                    draggableId={company.id}
+                                    index={companyIndex}
+                                  >
+                                    {(provided: DraggableProvided, snapshot: DraggableStateSnapshot) => (
+                                      <div
+                                        ref={provided.innerRef}
+                                        {...provided.draggableProps}
+                                        {...provided.dragHandleProps}
+                                        style={{
+                                          ...provided.draggableProps.style,
+                                        }}
+                                        className={`w-[50px] h-[50px] bg-gray-50 rounded-lg flex items-center justify-center hover:bg-gray-100 transition-all cursor-move group relative ${
+                                          snapshot.isDragging ? 'shadow-lg ring-2 ring-blue-500 ring-opacity-50 scale-105 z-50' : ''
+                                        }`}
+                                      >
+                                        <div className="relative w-full h-full">
+                                          <GlobeIcon color={stringToColor(company.name)} />
+                                        </div>
+                                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 rounded-lg z-10">
+                                          <span className="text-xs font-medium text-gray-800 px-2 text-center">
+                                            {company.name}
+                                          </span>
+                                        </div>
+                                      </div>
+                                    )}
+                                  </Draggable>
+                                ))}
+                                {provided.placeholder}
                               </div>
-                            ))}
-                          </div>
+                            )}
+                          </Droppable>
                         </div>
                       )}
                     </Draggable>
