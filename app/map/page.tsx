@@ -1,11 +1,9 @@
 'use client';
 
+import { useRef } from 'react';
 import Image from "next/image";
 import Link from "next/link";
 import { categories } from '../data/companies';
-import { useRef } from 'react';
-import { useReactToPrint } from 'react-to-print';
-// import type { PrintContextReturnType } from 'react-to-print';
 
 // Function to generate a color based on string
 function stringToColor(str: string) {
@@ -50,80 +48,39 @@ function GlobeIcon({ color }: { color: string }) {
 }
 
 export default function MapPage() {
-  const componentRef = useRef<HTMLDivElement>(null);
-
-  const handlePrint = useReactToPrint({
-    // @ts-ignore
-    content: () => componentRef.current,
-    pageStyle: `
-      @page {
-        size: A4 landscape;
-        margin: 15mm;
-      }
-      @media print {
-        body {
-          -webkit-print-color-adjust: exact;
-          print-color-adjust: exact;
-        }
-        .no-print {
-          display: none !important;
-        }
-        .print-content {
-          background-color: white !important;
-          padding: 0 !important;
-          margin: 0 !important;
-        }
-      }
-    `,
-  });
-
-  const onPrintClick = () => {
-    if (handlePrint) {
-      handlePrint();
-    }
+  const handlePrint = () => {
+    window.print();
   };
 
   return (
-    <div className="min-h-screen bg-[#f0f7fa] p-8">
-      {/* Header */}
-      <header className="max-w-7xl mx-auto mb-8 print-content">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold text-[#1a2b3b] mb-2">
-              Israeli Fintech Companies
-            </h1>
-            <h2 className="text-xl text-gray-600">
-              Banking And Payments Landscape
-            </h2>
+    <div className="min-h-screen bg-[#f0f7fa] p-8 print:p-0 print:bg-white">
+      <div className="printable-content">
+        {/* Header */}
+        <header className="max-w-7xl mx-auto mb-8">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-bold text-[#1a2b3b] mb-2">
+                Israeli Fintech Companies
+              </h1>
+              <h2 className="text-xl text-gray-600">
+                Banking And Payments Landscape
+              </h2>
+            </div>
+            <div className="flex items-center gap-4 print:hidden">
+              <span className="text-[#8b98a5]">2025</span>
+              <button className="bg-white px-4 py-2 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors flex items-center gap-2">
+                <span>OPEN IN FINDER</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                  <polyline points="15 3 21 3 21 9"></polyline>
+                  <line x1="10" y1="14" x2="21" y2="3"></line>
+                </svg>
+              </button>
+            </div>
           </div>
-          <div className="flex items-center gap-4">
-            <span className="text-[#8b98a5]">2025</span>
-            <button 
-              type="button"
-              onClick={onPrintClick}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 no-print"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="7 10 12 15 17 10"/>
-                <line x1="12" y1="15" x2="12" y2="3"/>
-              </svg>
-              <span>Export PDF</span>
-            </button>
-            <button className="bg-white px-4 py-2 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors flex items-center gap-2">
-              <span>OPEN IN FINDER</span>
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                <polyline points="15 3 21 3 21 9"></polyline>
-                <line x1="10" y1="14" x2="21" y2="3"></line>
-              </svg>
-            </button>
-          </div>
-        </div>
-      </header>
+        </header>
 
-      {/* Printable Content */}
-      <div ref={componentRef} className="print-content">
+        {/* Main Content */}
         <div className="max-w-7xl mx-auto flex gap-8">
           {/* Left Sidebar */}
           <div className="w-80 flex-shrink-0">
@@ -139,8 +96,15 @@ export default function MapPage() {
               </p>
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
-                    <Image src="/startup-nation-central.png" alt="Logo 1" width={32} height={32} className="rounded" />
+                  <div className="w-32 h-10 bg-white rounded-lg flex items-center justify-center px-3 border border-gray-100">
+                    <Image 
+                      src="/companies/startup-nation-central.svg" 
+                      alt="Startup Nation Central" 
+                      width={110} 
+                      height={28}
+                      className="object-contain w-full h-full"
+                      priority
+                    />
                   </div>
                   <div>
                     <h4 className="font-medium">Startup Nation Central</h4>
@@ -148,8 +112,15 @@ export default function MapPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
-                    <Image src="/startup-nation-central.png" alt="Logo 2" width={32} height={32} className="rounded" />
+                  <div className="w-32 h-10 bg-white rounded-lg flex items-center justify-center px-3 border border-gray-100">
+                    <Image 
+                      src="/companies/mongodb.png" 
+                      alt="MongoDB" 
+                      width={110} 
+                      height={28}
+                      className="object-contain w-full h-full"
+                      priority
+                    />
                   </div>
                   <div>
                     <h4 className="font-medium">Tech Alliance</h4>
@@ -157,8 +128,15 @@ export default function MapPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
-                    <Image src="/startup-nation-central.png" alt="Logo 3" width={32} height={32} className="rounded" />
+                  <div className="w-32 h-10 bg-white rounded-lg flex items-center justify-center px-3 border border-gray-100">
+                    <Image 
+                      src="/companies/vercel.svg" 
+                      alt="Vercel" 
+                      width={110} 
+                      height={28}
+                      className="object-contain w-full h-full invert"
+                      priority
+                    />
                   </div>
                   <div>
                     <h4 className="font-medium">Global Fintech</h4>
@@ -204,16 +182,165 @@ export default function MapPage() {
       </div>
 
       {/* Footer */}
-      <footer className="max-w-7xl mx-auto mt-8 flex items-center gap-2 text-sm text-gray-600">
-        <Image 
-          src="/startup-nation-central.png" 
-          alt="Startup Nation Central" 
-          width={24} 
-          height={24}
-          className="rounded"
-        />
-        <span>Powered by Startup Nation Finder</span>
+      <footer className="max-w-7xl mx-auto mt-8 flex items-center justify-between">
+        <div className="flex items-center gap-3 text-sm text-gray-600">
+          <div className="w-28 h-10">
+            <Image 
+              src="/companies/startup-nation-central.svg" 
+              alt="Startup Nation Central" 
+              width={84}
+              height={28}
+              className="object-contain w-full h-full"
+            />
+          </div>
+          <span>Powered by Startup Nation Finder</span>
+        </div>
+        <button 
+          type="button"
+          onClick={handlePrint}
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 print:hidden"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          <span>Export PDF</span>
+        </button>
       </footer>
+
+      <style jsx global>{`
+        @media print {
+          @page {
+            size: A4 landscape;
+            margin: 12mm;
+          }
+          
+          html, body {
+            width: 297mm;
+            height: 210mm;
+            margin: 0;
+            padding: 0;
+          }
+
+          body {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+
+          .print\\:hidden {
+            display: none !important;
+          }
+
+          .min-h-screen {
+            min-height: 0 !important;
+          }
+
+          .printable-content {
+            width: 100%;
+            height: calc(100% - 60px);
+            background: white;
+            transform: scale(0.88);
+            transform-origin: top center;
+            padding-bottom: 40px !important;
+          }
+
+          /* Maintain grid structure */
+          .grid {
+            display: grid !important;
+          }
+
+          .grid-cols-1 {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+          }
+
+          /* Adjust spacing for print */
+          .p-8 {
+            padding: 0.5rem !important;
+          }
+
+          .gap-8 {
+            gap: 0.75rem !important;
+          }
+
+          .gap-6 {
+            gap: 0.75rem !important;
+          }
+
+          .mb-8 {
+            margin-bottom: 0.75rem !important;
+          }
+
+          .p-6 {
+            padding: 0.75rem !important;
+          }
+
+          .mt-8 {
+            margin-top: 0 !important;
+          }
+
+          /* Adjust text sizes for print */
+          .text-3xl {
+            font-size: 1.5rem !important;
+          }
+
+          .text-xl {
+            font-size: 1.125rem !important;
+          }
+
+          .text-lg {
+            font-size: 1rem !important;
+          }
+
+          /* Ensure sidebar width is appropriate */
+          .w-80 {
+            width: 15rem !important;
+          }
+
+          /* Maintain company grid */
+          .grid-cols-6 {
+            grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+          }
+
+          /* Adjust icon sizes */
+          .w-\\[50px\\] {
+            width: 32px !important;
+          }
+
+          .h-\\[50px\\] {
+            height: 32px !important;
+          }
+
+          /* Adjust footer */
+          footer {
+            position: fixed !important;
+            bottom: 12mm !important;
+            left: 12mm !important;
+            right: 12mm !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            background: white !important;
+          }
+
+          /* Adjust max width container */
+          .max-w-7xl {
+            max-width: none !important;
+            width: 100% !important;
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+          }
+
+          /* Reduce paragraph size */
+          .text-sm {
+            font-size: 0.75rem !important;
+            line-height: 1.25 !important;
+          }
+
+          .leading-relaxed {
+            line-height: 1.4 !important;
+          }
+        }
+      `}</style>
     </div>
   );
 } 
