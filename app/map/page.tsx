@@ -1,9 +1,10 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import Image from "next/image";
 import Link from "next/link";
 import { categories } from '../data/companies';
+import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 
 // Function to generate a color based on string
 function stringToColor(str: string) {
@@ -48,8 +49,20 @@ function GlobeIcon({ color }: { color: string }) {
 }
 
 export default function MapPage() {
+  const [categoryList, setCategoryList] = useState(categories);
+  
   const handlePrint = () => {
     window.print();
+  };
+
+  const onDragEnd = (result: DropResult) => {
+    if (!result.destination) return;
+
+    const items = Array.from(categoryList);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+
+    setCategoryList(items);
   };
 
   return (
@@ -148,36 +161,65 @@ export default function MapPage() {
           </div>
 
           {/* Grid of Categories */}
-          <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6">
-            {categories.map((category) => (
-              <div key={category.name} className="bg-white rounded-xl p-6 shadow-sm">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-xl font-semibold">{category.name}</h3>
-                  <span className="bg-[#9ab7a0]/80 text-white px-2 py-0.5 rounded-full text-xs">
-                    {category.count}
-                  </span>
-                </div>
-                <div className="grid grid-cols-6 gap-3">
-                  {category.companies.map((company) => (
-                    <div 
-                      key={company.id} 
-                      className="w-[50px] h-[50px] bg-gray-50 rounded-lg flex items-center justify-center hover:bg-gray-100 transition-colors cursor-pointer group relative"
-                      title={company.name}
+          <DragDropContext onDragEnd={onDragEnd}>
+            <Droppable droppableId="categories" direction="horizontal">
+              {(provided) => (
+                <div 
+                  className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6"
+                  {...provided.droppableProps}
+                  ref={provided.innerRef}
+                >
+                  {categoryList.map((category, index) => (
+                    <Draggable 
+                      key={category.name} 
+                      draggableId={category.name} 
+                      index={index}
                     >
-                      <div className="relative w-full h-full">
-                        <GlobeIcon color={stringToColor(company.name)} />
-                      </div>
-                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 rounded-lg z-10">
-                        <span className="text-xs font-medium text-gray-800 px-2 text-center">
-                          {company.name}
-                        </span>
-                      </div>
-                    </div>
+                      {(provided, snapshot) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                          className={`bg-white rounded-xl p-6 shadow-sm transition-shadow ${
+                            snapshot.isDragging ? 'shadow-lg ring-2 ring-blue-500 ring-opacity-50' : ''
+                          }`}
+                          style={{
+                            ...provided.draggableProps.style,
+                          }}
+                        >
+                          <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-xl font-semibold">{category.name}</h3>
+                            <span className="bg-[#9ab7a0]/80 text-white px-2 py-0.5 rounded-full text-xs">
+                              {category.count}
+                            </span>
+                          </div>
+                          <div className="grid grid-cols-6 gap-3">
+                            {category.companies.map((company) => (
+                              <div 
+                                key={company.id} 
+                                className="w-[50px] h-[50px] bg-gray-50 rounded-lg flex items-center justify-center hover:bg-gray-100 transition-colors cursor-pointer group relative"
+                                title={company.name}
+                              >
+                                <div className="relative w-full h-full">
+                                  <GlobeIcon color={stringToColor(company.name)} />
+                                </div>
+                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 rounded-lg z-10">
+                                  <span className="text-xs font-medium text-gray-800 px-2 text-center">
+                                    {company.name}
+                                  </span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </Draggable>
                   ))}
+                  {provided.placeholder}
                 </div>
-              </div>
-            ))}
-          </div>
+              )}
+            </Droppable>
+          </DragDropContext>
         </div>
       </div>
 
