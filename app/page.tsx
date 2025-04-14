@@ -23,7 +23,7 @@ export default function Home() {
           </li>
           <li className="tracking-[-.01em]">
 
-            Hello David!!!!!!!!!!!!
+            Hello Tsipi!
             </li>
           <li>The Environment is {process.env.MY_VALUE}</li>
         </ol>
